@@ -29,7 +29,7 @@ SECRET_KEY = 'django-insecure-j(rfmb)h)uo(&rdn^-!)(6b6+ukffqbzubu_iwmliu^w3y+o$u
 
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://pasale-backend.onrender.com"
+    "https://silkhair-backend.onrender.com"
 ]
 
 # SECURITY WARNING: don't run with debug turned on in production!
