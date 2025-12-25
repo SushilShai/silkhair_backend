@@ -9,4 +9,5 @@ sqlparse
 psycopg2-binary
 python-dotenv
 xhtml2pdf
+mysqlclient
 waitress
