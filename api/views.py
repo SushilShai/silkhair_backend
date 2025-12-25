@@ -64,9 +64,9 @@ class SignupView(APIView):
             send_mail(
                 'SilkHair - Signup OTP Verification',
                 f'Dear {username},\n\nThank you for signing up with SilkHair!\n\nYour OTP code is: {otp}\n\nThis OTP is valid for 5 minutes.\n\nBest regards,\nThe SilkHair Team',
-                'shahisushil52@gmail.com',
+                'sushil@frontbase.com.np',
                 [email],
-                fail_silently=False,
+                fail_silently=True,
             )
         except Exception as e:
             # Log the error but don't fail the signup
@@ -147,7 +147,7 @@ class LoginView(APIView):
             f'Your OTP for login is {otp}',
             'sushil@frontbase.com.np',
             [user.email],
-            fail_silently=False,
+            fail_silently=True,
         )
 
         return Response({'message': 'OTP sent to your email. Please verify to proceed.'},
