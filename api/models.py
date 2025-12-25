@@ -54,20 +54,3 @@ class Product(models.Model):
             self.date_added = timezone.now()
         super().save(*args, **kwargs)
 
-class Party(models.Model):
-    id = models.AutoField(primary_key=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='parties')
-    CATEGORY_TYPE_CHOICES = [
-        ('individual', 'Individual'),
-        ('company', 'Company'),
-    ]
-    CATEGORY_LEVEL_CHOICES = [
-        ('local', 'Local'),
-        ('international', 'International'),
-    ]
-    category_type = models.CharField(max_length=20, choices=CATEGORY_TYPE_CHOICES)
-    category_level = models.CharField(max_length=20, choices=CATEGORY_LEVEL_CHOICES)
-    phone = models.CharField(max_length=20)
-
-    def __str__(self):
-        return f"{self.user.username} ({self.category_type})"

@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import UserProfile, Product, Party
+from .models import UserProfile, Product
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,8 +25,3 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'user', 'product_name', 'category', 'product_Img', 'unit_price', 'quantity', 'description']
-
-class PartySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Party
-        fields = "__all__"
