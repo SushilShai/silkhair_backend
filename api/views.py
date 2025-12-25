@@ -27,6 +27,19 @@ class SignupView(APIView):
         password = request.data.get('password')
         phone_no = request.data.get('phone_no')
         business_name = request.data.get('business_name')
+        login_type = request.data.get('login_type', 'email')  # Default to 'email'
+
+        # Validate required fields
+        if not username or not email or not password:
+            return Response({'error': 'Username, email, and password are required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if username already exists
+        if User.objects.filter(username=username).exists():
+            return Response({'error': 'Username already exists.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Check if email already exists
+        if User.objects.filter(email=email).exists():
+            return Response({'error': 'Email already exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
         # Create the user
         user = User.objects.create_user(username=username, email=email, password=password)
@@ -35,27 +48,35 @@ class SignupView(APIView):
         # Generate OTP
         otp = str(random.randint(100000, 999999))
 
-        # Create the user profile with OTP and timestamp
+        # Create the user profile with all fields
         user_profile = UserProfile.objects.create(
             user=user,
             phone_no=phone_no,
             business_name=business_name,
             otp=otp,
             otp_created_at=timezone.now(),
-            is_verify=False
+            is_verify=False,
+            login_type=login_type
         )
 
         # Send OTP to the user's email
-        send_mail(
-            'Signup OTP Verification',
-            f'Your OTP for signup is {otp}',
-            'sushil@fronbase.com.np',
-            [email],
-            fail_silently=False,
-        )
+        try:
+            send_mail(
+                'SilkHair - Signup OTP Verification',
+                f'Dear {username},\n\nThank you for signing up with SilkHair!\n\nYour OTP code is: {otp}\n\nThis OTP is valid for 5 minutes.\n\nBest regards,\nThe SilkHair Team',
+                'shahisushil52@gmail.com',
+                [email],
+                fail_silently=False,
+            )
+        except Exception as e:
+            # Log the error but don't fail the signup
+            print(f"Failed to send OTP email: {e}")
 
-        return Response({'message': 'User created successfully. Please verify the OTP sent to your email.'},
-                        status=status.HTTP_201_CREATED)
+        return Response({
+            'message': 'User created successfully. Please verify the OTP sent to your email.',
+            'user_id': user.id,
+            'email': email
+        }, status=status.HTTP_201_CREATED)
 
 
 # -----------------------------
