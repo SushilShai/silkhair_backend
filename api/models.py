@@ -13,7 +13,7 @@ class UserProfile(models.Model):
     is_verify = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    login_type = models.CharField(max_length=50, blank=True, null=True)
+    login_type = models.CharField(max_length=50, blank=True, null=True, default='email')
 
     def __str__(self):
         return self.user.username
