@@ -45,74 +45,20 @@ class SignupView(APIView):
         user = User.objects.create_user(username=username, email=email, password=password)
         user.save()
 
-        # Generate OTP
-        otp = str(random.randint(100000, 999999))
-
         # Create the user profile with all fields
         user_profile = UserProfile.objects.create(
             user=user,
             phone_no=phone_no,
             business_name=business_name,
-            otp=otp,
-            otp_created_at=timezone.now(),
-            is_verify=False,
+            is_verify=True,
             login_type=login_type
         )
 
-        # Send OTP to the user's email
-        try:
-            send_mail(
-                'SilkHair - Signup OTP Verification',
-                f'Dear {username},\n\nThank you for signing up with SilkHair!\n\nYour OTP code is: {otp}\n\nThis OTP is valid for 5 minutes.\n\nBest regards,\nThe SilkHair Team',
-                'sushil@frontbase.com.np',
-                [email],
-                fail_silently=True,
-            )
-        except Exception as e:
-            # Log the error but don't fail the signup
-            print(f"Failed to send OTP email: {e}")
-
         return Response({
-            'message': 'User created successfully. Please verify the OTP sent to your email.',
+            'message': 'User created successfully.',
             'user_id': user.id,
             'email': email
         }, status=status.HTTP_201_CREATED)
-
-
-# -----------------------------
-# Verify Signup OTP View
-# -----------------------------
-class VerifySignupOtpView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        email = request.data.get('email')
-        otp_provided = request.data.get('otp', '').strip()
-
-        try:
-            user = User.objects.get(email=email.lower())
-            user_profile = user.profile
-        except User.DoesNotExist:
-            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-        except UserProfile.DoesNotExist:
-            return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        # Check OTP expiry
-        if not user_profile.otp or not user_profile.otp_created_at:
-            return Response({'error': 'No OTP found'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if timezone.now() > user_profile.otp_created_at + OTP_EXPIRY_TIME:
-            return Response({'error': 'OTP expired'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Verify OTP
-        if str(user_profile.otp) == str(otp_provided):
-            user_profile.is_verify = True
-            user_profile.otp = None
-            user_profile.otp_created_at = None
-            user_profile.save()
-            return Response({'message': 'Signup OTP verified successfully!'}, status=status.HTTP_200_OK)
-        else:
-            return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 # -----------------------------
@@ -132,72 +78,21 @@ class LoginView(APIView):
         except User.DoesNotExist:
             return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
 
-        # Generate OTP
-        otp = str(random.randint(100000, 999999))
-
-        # Save OTP in user profile with timestamp
-        user_profile = user.profile
-        user_profile.otp = otp
-        user_profile.otp_created_at = timezone.now()
-        user_profile.save()
-
-        # Send OTP to the user's email
-        send_mail(
-            'Login OTP Verification',
-            f'Your OTP for login is {otp}',
-            'sushil@frontbase.com.np',
-            [user.email],
-            fail_silently=True,
-        )
-
-        return Response({'message': 'OTP sent to your email. Please verify to proceed.'},
-                        status=status.HTTP_200_OK)
-
-
-# -----------------------------
-# Verify Login OTP View
-# -----------------------------
-class VerifyLoginOtpView(APIView):
-    permission_classes = [AllowAny]
-
-    def post(self, request, *args, **kwargs):
-        email = request.data.get('email')
-        otp_provided = request.data.get('otp', '').strip()
-
-        try:
-            user = User.objects.get(email=email)
-            user_profile = user.profile
-        except User.DoesNotExist:
-            return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
-        except UserProfile.DoesNotExist:
-            return Response({'error': 'User profile not found'}, status=status.HTTP_404_NOT_FOUND)
-
-        # Check OTP expiry
-        if not user_profile.otp or not user_profile.otp_created_at:
-            return Response({'error': 'No OTP found'}, status=status.HTTP_400_BAD_REQUEST)
-
-        if timezone.now() > user_profile.otp_created_at + OTP_EXPIRY_TIME:
-            return Response({'error': 'OTP expired'}, status=status.HTTP_400_BAD_REQUEST)
-
-        # Verify OTP
-        if str(user_profile.otp) == str(otp_provided):
+        if user.check_password(password):
             refresh = RefreshToken.for_user(user)
             access_token = str(refresh.access_token)
 
-            # Clear OTP after successful verification
-            user_profile.otp = None
-            user_profile.otp_created_at = None
-            user_profile.save()
-
             return Response({
-                'message': 'Login OTP verified successfully!',
+                'message': 'Login successful!',
+                'user_id': user.id,
+                'email': user.email,
+                'username': user.username,
                 'refresh': str(refresh),
                 'access': access_token
             }, status=status.HTTP_200_OK)
         else:
-            return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
-
-
+            return Response({'error': 'invalid password'}, status=status.HTTP_400_BAD_REQUEST)
+        
 # -----------------------------
 # Product API View
 # -----------------------------
