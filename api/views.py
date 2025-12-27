@@ -3,12 +3,9 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from django.core.mail import send_mail
-import random
 from .models import Product, UserProfile
 from .serializers import ProductSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.utils import timezone
 from datetime import timedelta
 from rest_framework.pagination import PageNumberPagination
 
@@ -161,3 +158,6 @@ class ApiProductView(APIView):
         product.delete()
         return Response({'message': 'Product deleted successfully!'}, status=status.HTTP_200_OK)
 
+# -----------------------------
+# transaction views
+# -----------------------------
