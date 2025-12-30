@@ -161,3 +161,13 @@ class ApiProductView(APIView):
 # -----------------------------
 # transaction views
 # -----------------------------
+class ApiTransactionView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        # Implement logic to retrieve transactions for the authenticated user
+        pass
+
+    def post(self, request, *args, **kwargs):
+        # Implement logic to create a new transaction for the authenticated user
+        pass

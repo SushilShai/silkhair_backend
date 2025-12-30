@@ -26,7 +26,10 @@ DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',')
 
 CSRF_TRUSTED_ORIGINS = [
-    "https://silkhair-backend.onrender.com"
+    "https://silkhair-backend.onrender.com",
+    "http://localhost:8000",
+    "http://localhost:5173",
+
 ]
 
 
