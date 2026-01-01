@@ -3,8 +3,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import AllowAny, IsAuthenticated
-from .models import Product, UserProfile
-from .serializers import ProductSerializer
+from .models import Product, UserProfile, Transaction
+from .serializers import ProductSerializer, TransactionSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from datetime import timedelta
 from rest_framework.pagination import PageNumberPagination
@@ -165,9 +165,16 @@ class ApiTransactionView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, *args, **kwargs):
-        # Implement logic to retrieve transactions for the authenticated user
-        pass
+        transactions = Transaction.objects.filter(user=request.user)
+        serializer = TransactionSerializer(transactions, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        # Implement logic to create a new transaction for the authenticated user
-        pass
+        transaction_data = request.data.copy()
+        transaction_data['user'] = request.user.id  # Automatically set the user
+
+        serializer = TransactionSerializer(data=transaction_data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
