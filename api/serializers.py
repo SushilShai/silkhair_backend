@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import UserProfile, Product
+from .models import UserProfile, Product, Transaction
 
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
@@ -25,3 +25,22 @@ class ProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = Product
         fields = ['id', 'user', 'product_name', 'category', 'sku', 'unit_price', 'quantity', 'description']
+
+class TransactionSerializer(serializers.ModelSerializer):
+    product = serializers.StringRelatedField()  # Display product name instead of ID
+
+    class Meta:
+        model = Transaction
+        fields = [
+            'id',
+            'user',
+            'customer',
+            'email',
+            'product',
+            'quantity',
+            'total_price',
+            'status',
+            'payment_method',
+            'transaction_date'
+        ]
+        read_only_fields = ['id', 'user', 'transaction_date']
