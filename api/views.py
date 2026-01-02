@@ -162,10 +162,19 @@ class ApiProductView(APIView):
 # transaction views
 # -----------------------------
 class ApiTransactionView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated]  # Ensure only authenticated users can access
 
     def get(self, request, *args, **kwargs):
+        # Debug: Print the authenticated user
+        print(f"Authenticated user: {request.user}")
+
+        # Fetch transactions for the authenticated user
         transactions = Transaction.objects.filter(user=request.user)
+        print(f"Transactions: {transactions}")  # Debug: Print the transactions queryset
+
+        if not transactions.exists():  # Check if the queryset is empty
+            return Response({'message': 'No data'}, status=status.HTTP_200_OK)
+
         serializer = TransactionSerializer(transactions, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 

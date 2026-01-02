@@ -33,13 +33,14 @@ class TransactionSerializer(serializers.ModelSerializer):
         model = Transaction
         fields = [
             'id',
+            'user',
             'customer',
             'email',
             'product',
             'quantity',
             'total_price',
             'status',
-            'transaction_date',
-            'payment_method'
+            'payment_method',
+            'transaction_date'
         ]
-        read_only_fields = ['id', 'transaction_date']
+        read_only_fields = ['id', 'user', 'transaction_date']
